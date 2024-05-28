@@ -1,4 +1,8 @@
 const AdminController = require('../controller/AdminController');
+const CommonController = require('../controller/CommonController');
+const ProductController = require('../controller/ProductController');
+const uploadImage = require('../utils/imageUpload')
+
 const express = require('express'); //导入express
 
 const router = express.Router(); //创建路由对象
@@ -14,5 +18,11 @@ router.delete('/admin/deleteAdmin', AdminController.deleteAdmin);
 router.get('/admin/getAdminDim', AdminController.getAdminDim);
 //修改管理员信息
 router.put('/admin/updateAdmin', AdminController.updateAdmin);
+
+router.post('/product/item', ProductController.addProduct);
+router.get('/product/list', ProductController.getProductList);
+
+uploadImage(router)
+
 
 module.exports = router; //导出路由对象

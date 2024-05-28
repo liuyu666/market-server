@@ -29,6 +29,13 @@ const sqlmap = {
     `;
         },
     },
+    Product: {
+        productAdd: (data) => {
+            return `insert into products (title,price,images) values (${data
+                .map((item) => `'${item}'`)
+                .join(',')})`;
+        },
+    },
 
     /**
      * 分页查询
@@ -42,5 +49,5 @@ const sqlmap = {
         return `select * from ${table} limit ${limit} offset ${offset}`;
     },
 };
-const { Admin, pagingQuery } = sqlmap;
-module.exports = { Admin, pagingQuery };
+const { Admin, Product, pagingQuery } = sqlmap;
+module.exports = { Admin, Product, pagingQuery };
