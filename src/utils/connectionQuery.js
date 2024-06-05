@@ -1,11 +1,11 @@
 const { pool } = require('../db/index');
-const connectionQuery = (sql) => {
+const connectionQuery = (sql, params = []) => {
   return new Promise((resolve, reject) => {
     pool.getConnection((err, conn) => {
       if (err) {
         resolve(err);
       }
-      conn.query(sql, (err, result) => {
+        conn.query(sql, params, (err, result) => {
         conn.release();
         if (err) {
           reject(err);

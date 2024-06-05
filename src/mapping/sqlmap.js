@@ -1,7 +1,7 @@
 const sqlmap = {
     Admin: {
         adminAll: () => {
-            return `SELECT * FROM users`;
+            return `SELECT * FROM user`;
         },
         adminDel: (id) => {
             return `delete from admin where id = ${id}`;
@@ -31,7 +31,7 @@ const sqlmap = {
     },
     Product: {
         productAdd: (data) => {
-            return `insert into products (title,price,images) values (${data
+            return `insert into product (title,price,images) values (${data
                 .map((item) => `'${item}'`)
                 .join(',')})`;
         },
@@ -39,15 +39,35 @@ const sqlmap = {
 
     /**
      * 分页查询
-     * @param {number} page 查询页数
-     * @param {number} limit 查询条数
-     * @param {string} table 查询表
-     * @returns {string} 返回值为string类型
+     * @param {object} params 
+     * @param {number} params.page 查询页数
+     * @param {number} params.limit 查询条数
+     * @param {string} params.pid 商品id
+     * @param {string} params.table 查询表
+     * @returns 
      */
-    pagingQuery: (page, limit, table) => {
+    pagingQuery: ({ page, limit, pid, table }) => {
         const offset = (page - 1) * limit;
-        return `select * from ${table} limit ${limit} offset ${offset}`;
+        console.log(pid, 999);
+        if (pid) {
+            return {
+                sql: `SELECT * FROM ${table}
+            ORDER BY CASE WHEN id = ? THEN 0 ELSE 1 END, update_time DESC
+            limit ? offset ?`,
+                vars: [pid, limit, offset]
+            }
+        } else {
+            return {
+                sql: `select * from ${table} limit ? offset ?`,
+                vars: [limit, offset]
+            }
+        }
     },
+
+    totolCountQuery: (table) => {
+        return `SELECT COUNT(*) FROM ${table}`
+    }
+
 };
-const { Admin, Product, pagingQuery } = sqlmap;
-module.exports = { Admin, Product, pagingQuery };
+const { Admin, Product, pagingQuery, totolCountQuery } = sqlmap;
+module.exports = { Admin, Product, pagingQuery, totolCountQuery };

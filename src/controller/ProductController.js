@@ -28,8 +28,9 @@ class ProductController {
      * @param {Context} ctx
      */
     getProductList (req, res) {
-        const { limit = 10, page = 1 } = req.body;
-        ProductService.getProductListPage({ limit, page })
+        console.log(req, 11111122);
+        const { limit = 10, page = 1, pid } = req.query;
+        ProductService.getProductListPage({ limit, page, pid })
             .then((result) => {
                 res.json(response.success(result, 'success', 200));
             })

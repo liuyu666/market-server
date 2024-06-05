@@ -12,7 +12,7 @@ class AdminService {
      */
     getAdminListPage (data) {
         return connectionQuery(
-            pagingQuery(Number(data.page), Number(data.limit), 'users')
+            pagingQuery(Number(data.page), Number(data.limit), 'user')
         );
     }
 

@@ -3,8 +3,7 @@ const { Octokit } = require('@octokit/rest');
 const fs = require('fs');
 const dotenv = require('dotenv');
 dotenv.config();
-
-const upload = multer({ dest: 'uploads/' }); // 文件临时存储目录
+const { v4: uuidv4 } = require('uuid');
 
 // 初始化Octokit客户端
 const octokit = new Octokit({
@@ -23,11 +22,16 @@ function readFile (filePath) {
 }
 
 
+const upload = multer({ dest: 'uploads/' }); // 文件临时存储目录
+
 module.exports = function uploadImage (router) {
     router.post('/common/upload', upload.single('image'), async (req, res) => {
         try {
             const imagePath = req.file.path;
-            const fileName = req.file.originalname;
+            const originalname = req.file.originalname;
+            const suffix = originalname.split('.').at(-1)
+            const fileUuid = uuidv4();
+            const fileName = `${fileUuid}.${suffix}`
 
             // 读取文件内容
             const fileContent = await readFile(imagePath);
@@ -37,7 +41,7 @@ module.exports = function uploadImage (router) {
                 owner: process.env.GITHUB_USERNAME,
                 repo: process.env.REPO_NAME,
                 path: `images/${fileName}`, // 图片保存路径，可根据需要调整
-                message: `Upload image: ${fileName}`,
+                message: `Upload image`,
                 content: Buffer.from(fileContent).toString('base64'),
                 branch: process.env.BRANCH,
             });
