@@ -1,56 +1,26 @@
 const multer = require('multer');
-const { Octokit } = require('@octokit/rest');
 const fs = require('fs');
+const path = require('path');
+
 const dotenv = require('dotenv');
 dotenv.config();
 const { v4: uuidv4 } = require('uuid');
-
-// 初始化Octokit客户端
-const octokit = new Octokit({
-    auth: process.env.GITHUB_PASSWORD,
-});
-
-
-// 辅助函数读取文件
-function readFile (filePath) {
-    return new Promise((resolve, reject) => {
-        fs.readFile(filePath, (err, data) => {
-            if (err) reject(err);
-            else resolve(data);
-        });
-    });
-}
-
 
 const upload = multer({ dest: 'uploads/' }); // 文件临时存储目录
 
 module.exports = function uploadImage (router) {
     router.post('/common/upload', upload.single('image'), async (req, res) => {
         try {
-            const imagePath = req.file.path;
             const originalname = req.file.originalname;
             const suffix = originalname.split('.').at(-1)
             const fileUuid = uuidv4();
             const fileName = `${fileUuid}.${suffix}`
+            console.log(req.file, 90900);
+            const newPath = path.join(__dirname, '../public/images', req.file.filename);
+            fs.renameSync(req.file.destination + req.file.filename, newPath);
 
-            // 读取文件内容
-            const fileContent = await readFile(imagePath);
-
-            // 推送到GitHub仓库
-            await octokit.repos.createOrUpdateFileContents({
-                owner: process.env.GITHUB_USERNAME,
-                repo: process.env.REPO_NAME,
-                path: `images/${fileName}`, // 图片保存路径，可根据需要调整
-                message: `Upload image`,
-                content: Buffer.from(fileContent).toString('base64'),
-                branch: process.env.BRANCH,
-            });
-
-            // 清理临时文件
-            fs.unlinkSync(imagePath);
-
-            // 返回图片URL（假设GitHub Pages已启用）
-            const imageUrl = `https://raw.githubusercontent.com/${process.env.GITHUB_USERNAME}/${process.env.REPO_NAME}/${process.env.BRANCH}/images/${fileName}`;
+            // 返回文件的网络地址  
+            const imageUrl = `http://liuyu666.cn/images/${req.file.filename}`; // 替换为你的域名或IP地址  
             res.json({ success: true, imageUrl });
         } catch (error) {
             console.error(error);
