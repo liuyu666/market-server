@@ -2,6 +2,62 @@
 const AdminService = require('../service/AdminService');
 const response = require('../utils/response');
 class AdminController {
+    // ! using
+    login1 (req, res) {
+        const { account, code } = req.body;
+
+        AdminService.getAdminByAccount(account)
+            .then((result = []) => {
+                if (result && result.length > 0) {
+                    if (result[0].password === code) {
+                        res.json(response.success({
+                            token: 'c8wfb93chq98cb912ij3d',
+                            shop_id: result[0].shop_id
+                        }, 'success', 200));
+                    } else {
+                        res.json(response.error('密码错误', null, 401));
+                    }
+                } else {
+                    res.json(response.error('账号不存在', null, 401));
+                }
+                // 加个token
+            })
+            .catch((err) => {
+                res.json(response.error(err.code, null, err.errno));
+            });
+    }
+    login (req, res) {
+        const { account, code } = req.body;
+        AdminService.getTokenByLogin(account, code)
+            .then((result = {}) => {
+                console.log(result, 99988);
+                // status 0成功 1账号错误 2 密码错误 3其他错误
+                const { status = 0, token = 'c8wfb93chq98cb912ij3d', shop_id = 1 } = result
+                switch (status) {
+                    case 0:
+                        res.json(response.success({
+                            token,
+                        }, 'success', 200));
+                        break;
+
+                    case 1:
+                        res.json(response.error('账号不存在', null, 401));
+                        break;
+
+                    case 2:
+                        res.json(response.error('密码错误', null, 401));
+                        break;
+                    default:
+                        res.json(response.error('未知错误', null, 500));
+                        break;
+                }
+                
+            })
+            .catch((err) => {
+                console.log(err, 'error');
+                res.json(response.error(err.code, null, err.errno));
+            });
+    }
     getTest (req, res) {
         console.log('/admin/test', req, res);
         res.json({

@@ -13,7 +13,7 @@ class ProductService {
      */
     async getProductListPage (data) {
         try {
-            const { sql, vars } = pagingQuery({ page: Number(data.page), limit: Number(data.limit), pid: data.pid, table: 'product' })
+            const { sql, vars } = Product.pagingQuery({ page: Number(data.page), limit: Number(data.limit), pid: data.pid, sid: data.sid })
             console.log(1122,sql, vars);
             const list = await connectionQuery(sql, vars)
             console.log(list, 'list')

@@ -12,10 +12,20 @@ const sqlmap = {
                 .join(',')})`;
         },
         adminByAccount: (account) => {
-            return `select id,account,password,email,weight from admin where account like '%${account}%'`;
+            return {
+                sql: "select id, account, password, shop_id from user where account = ?",
+                vars: [account]
+            }
         },
         adminNameQuery: (account) => {
-            return `select id,account,password,email,weight from admin where account = '${account}'`;
+            return `select id,account,password,email,weight from user where account like '%${account}%'`;
+        },
+        tokenByAccount: ({ token, account }) => {
+            console.log('token, account', token, account)
+            return {
+                sql: 'UPDATE user SET token = ? WHERE account = ?',
+                vars: [token, account]
+            }
         },
         adminUpdate: (data) => {
             return `
@@ -35,6 +45,44 @@ const sqlmap = {
                 .map((item) => `'${item}'`)
                 .join(',')})`;
         },
+        pagingQuery: ({ page, limit, pid, sid }) => {
+            const offset = (page - 1) * limit;
+            const emptySid = sid === undefined || sid === 'undefined'
+            const emptyPid = pid === undefined || pid === 'undefined'
+            console.log('!emptyPid', !emptyPid);
+            if (!emptyPid) {
+                return {
+                    sql: `SELECT * FROM product ${!emptySid ? 'WHERE shop_id = ' + sid : ''}
+                ORDER BY CASE WHEN id = ? THEN 0 ELSE 1 END, update_time DESC
+                limit ? offset ?`,
+                    vars: [pid, limit, offset]
+                }
+            } else {
+                return {
+                    sql: `select * from product ${!emptySid ? 'WHERE shop_id = ' + sid : ''}
+                limit ? offset ?`,
+                    vars: [limit, offset]
+                }
+            }
+        },
+    },
+
+    Shop: {
+        shopAdd: (data) => {
+            return `insert into shop (title,price,images) values (${data
+                .map((item) => `'${item}'`)
+                .join(',')})`;
+        },
+        pagingQuery: ({ page, limit, sid }) => {
+            console.log("=====99", sid);
+            const offset = (page - 1) * limit;
+            return {
+                sql: `SELECT * FROM shop
+            ORDER BY CASE WHEN id = ? THEN 0 ELSE 1 END, update_time DESC
+            limit ? offset ?`,
+                vars: [sid, limit, offset]
+            }
+        },
     },
 
     /**
@@ -46,19 +94,24 @@ const sqlmap = {
      * @param {string} params.table 查询表
      * @returns 
      */
-    pagingQuery: ({ page, limit, pid, table }) => {
+    pagingQuery: ({ page, limit, pid, sid, table }) => {
+        console.log('pid-----:' , pid);
         const offset = (page - 1) * limit;
-        console.log(pid, 999);
-        if (pid) {
+        const emptySid = sid === undefined || sid === 'undefined'
+        const emptyPid = sid === undefined || sid === 'undefined'
+        console.log();
+        if (!emptyPid) {
+            console.log(9999999);
             return {
-                sql: `SELECT * FROM ${table}
-            ORDER BY CASE WHEN id = ? THEN 0 ELSE 1 END, update_time DESC
-            limit ? offset ?`,
+                sql: `SELECT * FROM ${table} ${!emptySid ? 'WHERE shop_id = ' + sid : ''}
+                ORDER BY CASE WHEN id = ? THEN 0 ELSE 1 END, update_time DESC
+                limit ? offset ?`,
                 vars: [pid, limit, offset]
             }
         } else {
             return {
-                sql: `select * from ${table} limit ? offset ?`,
+                sql: `select * from ${table} ${!emptySid ? 'WHERE shop_id = ' + sid : ''}
+                limit ? offset ?`,
                 vars: [limit, offset]
             }
         }
@@ -69,5 +122,5 @@ const sqlmap = {
     }
 
 };
-const { Admin, Product, pagingQuery, totolCountQuery } = sqlmap;
-module.exports = { Admin, Product, pagingQuery, totolCountQuery };
+const { Admin, Product, Shop, pagingQuery, totolCountQuery } = sqlmap;
+module.exports = { Admin, Product, Shop, pagingQuery, totolCountQuery };

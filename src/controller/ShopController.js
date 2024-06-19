@@ -1,18 +1,18 @@
 
-const ProductService = require('../service/ProductService');
+const ShopService = require('../service/ShopService');
 const response = require('../utils/response');
-class ProductController {
+class ShopController {
 
     /**
      * 新增数据
      * @param {Context} ctx
      */
-    async addProduct (req, res) {
-        const { body: product } = req;
-        ProductService.addProduct([
-            product.title,
-            product.price,
-            product.images
+    async addShop (req, res) {
+        const { body: shop } = req;
+        ShopService.addShop([
+            shop.title,
+            shop.price,
+            shop.images
         ])
             .then(() => {
                 res.json(response.success(null, 'success', 200));
@@ -27,10 +27,9 @@ class ProductController {
      * 获得产品列表分页数据
      * @param {Context} ctx
      */
-    getProductList (req, res) {
-        const { limit = 10, page = 1, pid, sid } = req.query;
-        console.log(pid, sid, '98======');
-        ProductService.getProductListPage({ limit, page, pid, sid })
+    getShopList (req, res) {
+        const { limit = 10, page = 1, sid } = req.query;
+        ShopService.getShopListPage({ limit, page, sid })
             .then((result) => {
                 res.json(response.success(result, 'success', 200));
             })
@@ -40,4 +39,4 @@ class ProductController {
     }
 
 }
-module.exports = new ProductController();
+module.exports = new ShopController();
